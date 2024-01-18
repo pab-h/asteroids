@@ -22,15 +22,18 @@ class Asteroids(Sprite, Updateable):
 
         self.position = pygame.Vector2(200, 200)
 
-        self.angle = radians(random() * 360)
-
         self.velocity = 100
-        self.velocityHat = pygame.Vector2(
-            cos(self.angle), 
-            sin(self.angle)
-        )
+        self.velocityHat = self.randomDirection()
 
         self.draw()
+
+    def randomDirection(self) -> pygame.Vector2:
+        angle = radians(random() * 360)
+
+        return pygame.Vector2(
+            cos(angle), 
+            sin(angle)
+        )
 
     def draw(self) -> None:
         pygame.draw.circle(
