@@ -1,7 +1,5 @@
 import pygame
 
-from random import random
-
 class App:
     def __init__(self) -> None:
         self.screen = pygame.display.set_mode(
