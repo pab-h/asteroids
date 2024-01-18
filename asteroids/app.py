@@ -9,7 +9,7 @@ class App:
         )
         self.clock = pygame.time.Clock()
         self.runnig = False
-        self.fps = 1
+        self.fps = 60
 
     def __enter__(self):
         pygame.init()
@@ -25,13 +25,9 @@ class App:
         self.runnig = True
 
         while self.runnig:
-            # Para voce ficar cego ai, rsrsrs
+            # Atualize aqui
 
-            r = random() * 255
-            g = random() * 255
-            b = random() * 255
-
-            self.screen.fill(color = (r, g, b))
+            # Desenhe aqui
 
             pygame.display.update()
 
