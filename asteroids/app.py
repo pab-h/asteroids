@@ -1,6 +1,6 @@
 import pygame
 
-from asteroids.objects.space_ship import Space_Ship
+from asteroids.objects.spaceship import SpaceShip
 
 class App:
     pygame.display.set_caption("Asteroid City")
@@ -23,15 +23,15 @@ class App:
     def run(self) -> None:
         dt = 0
 
-        ship = Space_Ship()
+        ship = SpaceShip()
         
         self.runnig = True
 
         while self.runnig:
-            # Atualize aqui
+            self.screen.fill("black")
 
-            # Desenhe aqui
-            
+            ship.update(self.screen, dt)
+
             pygame.display.update()
 
             for event in pygame.event.get():
