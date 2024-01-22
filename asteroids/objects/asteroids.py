@@ -17,10 +17,10 @@ class Asteroids(Group, Updateable):
         self.target = target
         self.maxAsteroids = 10
         self.radius = self.getSpawnRadius()
-        self.centerOffset = self.getCenterOffset()
+        self.center = self.getSpawnCenter()
         self.asteroids = self.populate()
 
-    def getCenterOffset(self) -> pygame.Vector2:
+    def getSpawnCenter(self) -> pygame.Vector2:
         size = pygame.display.get_window_size()
 
         return pygame.Vector2(size) / 2
@@ -42,7 +42,7 @@ class Asteroids(Group, Updateable):
     def createAsteroid(self) -> Asteroid:
         spawnPoint = pygame.Vector2(self.radius, random() * 360)
         spawnPoint = pygame.Vector2.from_polar(spawnPoint)
-        spawnPoint += self.centerOffset
+        spawnPoint += self.center
 
         asteroid = Asteroid(spawnPoint)
         asteroid.velocityHat = self.getDirection(asteroid)
@@ -55,6 +55,16 @@ class Asteroids(Group, Updateable):
         
         return offsetRadius + width / 2 ** 0.5
     
+    def rebound(self) -> None:
+        for asteroid in self.asteroids:
+            distance = asteroid.position - self.center
+            distance = distance.length()
+
+            if distance - self.radius > 0:
+                asteroid.velocityHat.rotate_ip(180)
+
     def update(self, screen: pygame.Surface, dt: float) -> None:
+        self.rebound()
+
         for asteroid in self.asteroids:
             asteroid.update(screen, dt)
