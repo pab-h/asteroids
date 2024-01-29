@@ -32,16 +32,16 @@ class Asteroid(Sprite, Placeable, Updateable):
         )
         self.rect = self.surface.get_rect()
 
-        self.velocity = 100
+        self.velocity = choice([ 50, 100, 150, 200 ])
         self.velocityHat = Vector2(0, 0)
 
         self.angle = 0
-        self.angularVelocity = (300 - 50) * random() + 50
-        self.angularVelocityHat = choice([1, -1])
+        self.angularVelocity = choice([ 300, 200, 100, 50 ])
+        self.angularVelocityHat = choice([ 1, -1 ])
 
         self.padding = Vector2(50, 50)
 
-        self.amoutPoints = int((10 - 6) * random()) + 6
+        self.amoutPoints = choice([ 10, 8, 6 ])
         self.points: list[Vector2] = []
         self.centerPoint = Vector2(0, 0)
 
