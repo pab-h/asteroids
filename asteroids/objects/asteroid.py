@@ -1,5 +1,7 @@
 import pygame.draw as draw
 
+import pygame.transform as transform
+
 from pygame.sprite import Sprite
 
 from pygame import Vector2
@@ -13,6 +15,7 @@ from asteroids.interfaces.placeable import Placeable
 from math import atan2
 
 from random import random
+from random import choice
 
 class Asteroid(Sprite, Placeable, Updateable): 
     def __init__(self, position: Vector2) -> None:
@@ -31,6 +34,10 @@ class Asteroid(Sprite, Placeable, Updateable):
 
         self.velocity = 100
         self.velocityHat = Vector2(0, 0)
+
+        self.angle = 0
+        self.angularVelocity = (300 - 50) * random() + 50
+        self.angularVelocityHat = choice([1, -1])
 
         self.padding = Vector2(50, 50)
 
@@ -98,7 +105,12 @@ class Asteroid(Sprite, Placeable, Updateable):
 
     def update(self, screen: Surface, dt: float) -> None:
         self.position += self.velocityHat * self.velocity * dt
+        self.angle += self.angularVelocity * self.angularVelocityHat * dt
+
+        rotatedSurface = transform.rotate(self.surface, self.angle)
 
         self.rect.center = self.position
 
-        screen.blit(self.surface, self.rect)
+        self.rect.center -= Vector2(rotatedSurface.get_size()) / 2
+
+        screen.blit(rotatedSurface, self.rect.center)
