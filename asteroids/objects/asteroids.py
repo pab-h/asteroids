@@ -1,4 +1,7 @@
-import pygame
+from pygame import Vector2
+from pygame import Surface
+from pygame import display
+from pygame import Rect
 
 from pygame.sprite import Group
 
@@ -9,39 +12,36 @@ from asteroids.objects.asteroid import Asteroid
 
 from random import random
 
+from typing import Optional
+
 class Asteroids(Group, Updateable):
     def __init__(self, target: Placeable) -> None:
         super().__init__()
         Updateable.__init__(self)
 
         self.target = target
-        self.maxAsteroids = 10
         self.radius = self.getSpawnRadius()
         self.center = self.getSpawnCenter()
-        self.asteroids = self.populate()
+        self.asteroids: list[Asteroid] = []
+        
+    def getSpawnCenter(self) -> Vector2:
+        size = display.get_window_size()
 
-    def getSpawnCenter(self) -> pygame.Vector2:
-        size = pygame.display.get_window_size()
+        return Vector2(size) / 2
 
-        return pygame.Vector2(size) / 2
-
-    def getDirection(self, asteroid: Asteroid) -> pygame.Vector2:
+    def getDirection(self, asteroid: Asteroid) -> Vector2:
         distance = self.target.position - asteroid.position 
 
         return distance.normalize()
 
-    def populate(self) -> list[Asteroid]:
-        asteroids = []
-
-        for _ in range(self.maxAsteroids):
+    def populate(self, amout: int) -> None:
+        for _ in range(amout):
             asteroid = self.createAsteroid()
-            asteroids.append(asteroid)
-
-        return asteroids
+            self.asteroids.append(asteroid)
 
     def createAsteroid(self) -> Asteroid:
-        spawnPoint = pygame.Vector2(self.radius, random() * 360)
-        spawnPoint = pygame.Vector2.from_polar(spawnPoint)
+        spawnPolarPoint = Vector2(self.radius, random() * 360)
+        spawnPoint = Vector2.from_polar(spawnPolarPoint)
         spawnPoint += self.center
 
         asteroid = Asteroid(spawnPoint)
@@ -50,7 +50,7 @@ class Asteroids(Group, Updateable):
         return asteroid
 
     def getSpawnRadius(self) -> float:
-        width = pygame.display.get_window_size()[0]
+        width = display.get_window_size()[0]
         offsetRadius = 10
         
         return offsetRadius + width / 2 ** 0.5
@@ -63,7 +63,19 @@ class Asteroids(Group, Updateable):
             if distance - self.radius > 0:
                 asteroid.velocityHat.rotate_ip(180)
 
-    def update(self, screen: pygame.Surface, dt: float) -> None:
+    def collidePoint(self, point: Vector2) -> Optional[Asteroid]:
+        for asteroid in self.asteroids:
+            if asteroid.collidePoint(point):
+                return asteroid
+        return None
+    
+    def collideRect(self, rect: Rect) -> Optional[Asteroid]:
+        for asteroid in self.asteroids:
+            if asteroid.collideRect(rect):
+                return asteroid
+        return None
+
+    def update(self, screen: Surface, dt: float) -> None:
         self.rebound()
 
         for asteroid in self.asteroids:

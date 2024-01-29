@@ -1,59 +1,102 @@
-import pygame
+import pygame.draw as draw
 
-from math import radians
-from math import sin
-from math import cos
+from pygame.sprite import Sprite
+
+from pygame import Vector2
+from pygame import Surface
+from pygame import Rect
+from pygame import SRCALPHA
+
+from asteroids.interfaces.updateable import Updateable
+from asteroids.interfaces.placeable import Placeable
+
 from math import atan2
 
 from random import random
 
-from pygame.sprite import Sprite
-from asteroids.interfaces.updateable import Updateable
-
-class Asteroid(Sprite, Updateable): 
-    def __init__(self, position: pygame.Vector2) -> None:
+class Asteroid(Sprite, Placeable, Updateable): 
+    def __init__(self, position: Vector2) -> None:
         super().__init__()
+        Placeable.__init__(self)
         Updateable.__init__(self)
-
-        self.size = pygame.Vector2(100, 100) 
-        self.surface = pygame.Surface(
-            size = self.size,
-            flags = pygame.SRCALPHA
-        )
-        self.rect = self.surface.get_rect()
 
         self.position = position
 
-        self.velocity = 100
-        self.velocityHat = pygame.Vector2(0, 0)
+        self.radius = 50
+        self.surface = Surface(
+            size = Vector2(2, 2) * self.radius,
+            flags = SRCALPHA
+        )
+        self.rect = self.surface.get_rect()
 
+        self.velocity = 100
+        self.velocityHat = Vector2(0, 0)
+
+        self.padding = Vector2(50, 50)
+
+        self.amoutPoints = int((10 - 6) * random()) + 6
+        self.points: list[Vector2] = []
+        self.centerPoint = Vector2(0, 0)
+
+        self.populatePoints()
+        self.setCenterPoint()
+        self.sortPoints()
         self.draw()
 
-    def draw(self) -> None:
-        points = [pygame.Vector2(random() * 100, random() * 100) for _ in range(5)]
+    def populatePoints(self) -> None:
+        deltaTheta = 360 / self.amoutPoints
+        deltaThetaMin = 0
 
-        def getCenter(points: list[pygame.Vector2]) -> pygame.Vector2:
-            start = pygame.Vector2(0, 0)
+        center = Vector2(1, 1) * self.radius
 
-            return sum(points, start) / len(points)
+        for i in range(self.amoutPoints):
+            deltaThetaMin = i * deltaTheta
+            theta = random() * deltaTheta + deltaThetaMin
 
-        center = getCenter(points)
+            polarPoint = Vector2(self.radius, theta)
+            point = Vector2.from_polar(polarPoint)
+            point = point + center
 
-        def angle(point: pygame.Vector2) -> float:
-            v = point - center
+            self.points.append(point)
+
+    def setCenterPoint(self) -> None:
+        start = Vector2(0, 0)
+
+        self.centerPoint = sum(self.points, start) / len(self.points)
+
+    def sortPoints(self) -> None: 
+        def angle(point: Vector2) -> float:
+            v = point - self.centerPoint
 
             return atan2(v.y, v.x)
         
-        points.sort(key = angle)
+        self.points.sort(key = angle)
 
-        pygame.draw.polygon(
+    def collidePoint(self, point: Vector2) -> bool: 
+        distance = self.position.distance_to(point)
+
+        return distance - self.radius <= 0
+    
+    def collideRect(self, rect: Rect) -> bool: 
+        distance = rect.center - self.position
+        distanceHat = Vector2(0, 0)
+
+        if distance.length() > 0:
+            distanceHat = distance.normalize()
+
+        collidePoint = self.position + self.radius * distanceHat
+
+        return rect.collidepoint(collidePoint)
+    
+    def draw(self) -> None:
+        draw.polygon(
             surface = self.surface, 
             color = "red", 
-            points = points, 
-            width = 1
+            points = self.points, 
+            width = 3
         )
 
-    def update(self, screen: pygame.Surface, dt: float) -> None:
+    def update(self, screen: Surface, dt: float) -> None:
         self.position += self.velocityHat * self.velocity * dt
 
         self.rect.center = self.position
