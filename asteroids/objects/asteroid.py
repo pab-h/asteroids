@@ -108,9 +108,9 @@ class Asteroid(Sprite, Placeable, Updateable):
         self.angle += self.angularVelocity * self.angularVelocityHat * dt
 
         rotatedSurface = transform.rotate(self.surface, self.angle)
+        rotatedRect = rotatedSurface.get_rect()
 
         self.rect.center = self.position
+        rotatedRect.center = self.position
 
-        self.rect.center -= Vector2(rotatedSurface.get_size()) / 2
-
-        screen.blit(rotatedSurface, self.rect.center)
+        screen.blit(rotatedSurface, rotatedRect)
