@@ -45,6 +45,7 @@ class Asteroids(Group, Updateable):
         spawnPoint += self.center
 
         asteroid = Asteroid(spawnPoint)
+        asteroid.init()
         asteroid.velocityHat = self.getDirection(asteroid)
 
         return asteroid
@@ -74,6 +75,12 @@ class Asteroids(Group, Updateable):
             if asteroid.collideRect(rect):
                 return asteroid
         return None
+    
+    def kill(self, asteroid: Asteroid) -> None:
+        self.asteroids.remove(asteroid)
+
+    def addAll(self, asteroids: list[Asteroid]) -> None:
+        self.asteroids = self.asteroids + asteroids
 
     def update(self, screen: Surface, dt: float) -> None:
         self.rebound()

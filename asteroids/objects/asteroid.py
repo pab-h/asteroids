@@ -17,6 +17,8 @@ from math import atan2
 from random import random
 from random import choice
 
+from typing import Optional
+
 class Asteroid(Sprite, Placeable, Updateable): 
     def __init__(self, position: Vector2) -> None:
         super().__init__()
@@ -26,11 +28,8 @@ class Asteroid(Sprite, Placeable, Updateable):
         self.position = position
 
         self.radius = 50
-        self.surface = Surface(
-            size = Vector2(2, 2) * self.radius,
-            flags = SRCALPHA
-        )
-        self.rect = self.surface.get_rect()
+        self.surface: Optional[Surface] = None
+        self.rect: Optional[Rect] = None
 
         self.velocity = choice([ 50, 100, 150, 200 ])
         self.velocityHat = Vector2(0, 0)
@@ -44,6 +43,13 @@ class Asteroid(Sprite, Placeable, Updateable):
         self.amoutPoints = choice([ 10, 8, 6 ])
         self.points: list[Vector2] = []
         self.centerPoint = Vector2(0, 0)
+
+    def init(self) -> None:
+        self.surface = Surface(
+            size = Vector2(2, 2) * self.radius,
+            flags = SRCALPHA
+        )
+        self.rect = self.surface.get_rect()
 
         self.populatePoints()
         self.setCenterPoint()
@@ -95,6 +101,32 @@ class Asteroid(Sprite, Placeable, Updateable):
 
         return rect.collidepoint(collidePoint)
     
+    def rupture(self) -> list['Asteroid']:
+        asteroids = []
+        
+        for i in range(2):
+            if self.radius // 2 <= 10:
+                continue
+
+            asteroid = Asteroid(self.position.copy())
+
+            asteroid.radius = self.radius // 2
+            asteroid.velocity = self.velocity // 2
+            asteroid.angularVelocity = self.angularVelocity // 2
+
+            if self.amoutPoints // 2 >= 4:
+                asteroid.amoutPoints = self.amoutPoints // 2
+
+            angle = (-1)**i * 45
+
+            asteroid.velocityHat = self.velocityHat.rotate(angle)
+
+            asteroid.init()
+
+            asteroids.append(asteroid)
+
+        return asteroids
+
     def draw(self) -> None:
         draw.polygon(
             surface = self.surface, 
@@ -108,9 +140,9 @@ class Asteroid(Sprite, Placeable, Updateable):
         self.angle += self.angularVelocity * self.angularVelocityHat * dt
 
         rotatedSurface = transform.rotate(self.surface, self.angle)
+        rotatedRect = rotatedSurface.get_rect()
 
         self.rect.center = self.position
+        rotatedRect.center = self.position
 
-        self.rect.center -= Vector2(rotatedSurface.get_size()) / 2
-
-        screen.blit(rotatedSurface, self.rect.center)
+        screen.blit(rotatedSurface, rotatedRect)
