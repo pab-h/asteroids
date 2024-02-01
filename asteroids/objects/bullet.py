@@ -1,17 +1,25 @@
+from typing import Any
 import pygame
 
 from pygame.sprite import Sprite
 from asteroids.interfaces.updateable import Updateable
 
 
-class Bullet(Sprite, Updateable):
-    def __init__(self, pos_x,pos_y):
-        super().__init__()
-        Updateable.__init__(self)
+class Bullet(Sprite, Updateable, x, y):
+    def __init__(self, *groups) -> None:
+        super().__init__(*groups)
+        #Updateable.__init__(self)
         
-        self.image = pygame.Surface((10,10))
-        self.image.fill((255,0,0))
-        self.rect = self.image.get_rect(center = (pos_x,pos_y))
+        self.surface = pygame.transform.scale (\
+             pygame.image.load("./asteroids/assets/shot.png")\
+            .convert_alpha(),(15,15))
+        self.position = pygame.Vector2(x,y)
+        self.rect = self.surface.get_rect(center = self.position)
+        self.velocity = pygame.Vector2(10 , 10)
+    
         
-    def update(self, screen: pygame.Surface):
-        self.rect.x +=5
+        self.bullet_group = pygame.sprite.Group()
+    
+    def update(self, screen: pygame.Surface, dt: float) -> None:
+        self.rect.x += self.velocity *dt
+        #screen.blit(self.surface,self.rect)              
