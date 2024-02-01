@@ -1,4 +1,4 @@
-import pygame
+import pygame, math
 import pygame.transform as transform
 
 from pygame import Vector2
@@ -23,36 +23,33 @@ class SpaceShip(Sprite, Updateable):
         self.rect = self.surface.get_rect(center = self.position)
         self.angle = 0
         self.surface_copy = pygame.transform.rotate(self.surface,self.angle)
-        self.velocity = pygame.Vector2(0 , 50)
-      
+        self.velocity = pygame.Vector2(0 , 0)
+        self.angle_of_movement = math.atan2(self.velocity[1], self.velocity[0])
            
-    def movement(self, screen) -> None:
+    def movement(self) -> None:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_RIGHT]: 
-            #self.velocity = self.velocity.rotate(5)
-            #self.angularVelocityHat += 5
-            #print(self.velocity[1])
-            self.velocity = self.velocity.rotate(+5)
-            self.angle = self.angle - 5
+            self.angle = self.angle + 5
             self.surface_copy = pygame.transform.rotate(self.surface2,self.angle)
         else:
             self.surface_copy = pygame.transform.rotate(self.surface,self.angle)
 
         if keys[pygame.K_LEFT]: 
-            self.velocity = self.velocity.rotate(-5)
-            self.angle = self.angle + 5
-            self.surface_copy = pygame.transform.rotate(self.surface2,self.angle)
+            self.angle = self.angle - 5
+            
+            self.surface_copy = pygame.transform.rotate(self.surface2,-self.angle)
         else:
-            self.surface_copy = pygame.transform.rotate(self.surface,self.angle)
+            self.surface_copy = pygame.transform.rotate(self.surface,-self.angle)
         
         if keys[pygame.K_UP]: 
-            self.velocity[1] = self.velocity[1] +2
-            self.surface_copy = pygame.transform.rotate(self.surface2,self.angle)
-        else:
-            if self.velocity[1] > 1:
-                self.velocity[1] = self.velocity[1] -3
-                self.surface_copy = pygame.transform.rotate(self.surface,self.angle)
+            self.velocity[0] += math.sin(self.angle) * 2 
+            self.velocity[1] += math.cos(self.angle) * 2 
+            self.surface_copy = pygame.transform.rotate(self.surface2,-self.angle)
+        #else:
+            #if self.velocity[1] > 1:
+                #self.velocity[1] = self.velocity[1] -3
+                #self.surface_copy = pygame.transform.rotate(self.surface,self.angle)
             
         
         if keys[pygame.K_SPACE]: 
@@ -66,8 +63,9 @@ class SpaceShip(Sprite, Updateable):
         
         self.position -= self.velocity * dt
         self.rect.center = self.position
-        self.movement(screen)
-        
+        self.movement()
+        print(self.angle)
+        #print(self.position)
         screen.blit(self.surface_copy,(self.position[0] - int(self.surface_copy.get_width()/2), self.position[1] - int(self.surface_copy.get_height()/2)))
         #screen.blit(self.surface_copy,self.rect)              
         
