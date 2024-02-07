@@ -4,6 +4,7 @@ from asteroids.objects.spaceship import SpaceShip
 from asteroids.objects.stars import Stars
 from asteroids.objects.asteroids import Asteroids
 from asteroids.objects.hud import HUD
+from asteroids.objects.bullets import Bullets
 
 class App:
     def __init__(self) -> None:
@@ -19,6 +20,7 @@ class App:
         self.spaceShip = SpaceShip()
         self.stars = Stars()
         self.asteroids = Asteroids(self.spaceShip)
+        self.bullets = Bullets()
         self.hud = None
 
     def __enter__(self):
@@ -45,6 +47,7 @@ class App:
             self.stars.update(self.screen, dt)
             self.asteroids.update(self.screen, dt)
             self.spaceShip.update(self.screen, dt)
+            self.bullets.update(self.screen, dt)
             self.hud.update(self.screen, dt)
 
             pygame.display.update()
@@ -52,5 +55,10 @@ class App:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.runnig = False
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        bullet = self.spaceShip.shoot()
+                        self.bullets.addAll([ bullet ])
                     
             dt = self.clock.tick(self.fps) / 1000

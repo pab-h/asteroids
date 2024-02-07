@@ -7,12 +7,13 @@ from pygame import K_a
 from pygame.sprite import Sprite
 
 import pygame.image as image
-import pygame.draw as draw
 import pygame.key as key
 import pygame.transform as transform
 
 from asteroids.interfaces.placeable import Placeable
 from asteroids.interfaces.updateable import Updateable
+
+from asteroids.objects.bullet import Bullet
 
 class SpaceShip(Sprite, Placeable, Updateable):
     def __init__(self) -> None:
@@ -22,21 +23,22 @@ class SpaceShip(Sprite, Placeable, Updateable):
 
         self.position = Vector2(300, 300)
 
-        self.surface = image.load("./asteroids/assets/nave.png")
+        self.surface = image\
+            .load("./asteroids/assets/nave.png")\
+            .convert_alpha()
         self.rect = self.surface.get_rect()
 
         self.direction = Vector2(self.rect.centerx, self.rect.y) - self.position
         self.direction.normalize_ip()
 
         self.acceleration = 100
-
         self.velocityHat = self.direction.copy()
-        self.velocityHat.rotate_ip(70)
-
         self.velocity = 100
         self.angularVelocity = 100
-
         self.friction = 25
+
+    def shoot(self) -> Bullet:
+        return Bullet(self, self.direction)
 
     def move(self, dt: float) -> None:
         keys = key.get_pressed()
