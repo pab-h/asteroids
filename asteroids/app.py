@@ -44,6 +44,20 @@ class App:
         while self.runnig:
             self.screen.fill("black")
 
+            for bullet in self.bullets:
+                asteroid = self.asteroids.collidePoint(bullet.position) 
+
+                if asteroid:
+                    fragments = asteroid.rupture()
+                    self.asteroids.addAll(fragments)
+                    self.asteroids.kill(asteroid)
+                    self.bullets.kill(bullet)
+
+            asteroid = self.asteroids.collideRect(self.spaceShip.rect)
+
+            if asteroid:
+                print("TOME UM DANO PARA LARGAR DE SER BESTA")
+
             self.stars.update(self.screen, dt)
             self.asteroids.update(self.screen, dt)
             self.spaceShip.update(self.screen, dt)
