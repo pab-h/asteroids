@@ -3,6 +3,9 @@ from pygame import Vector2
 from pygame import K_w
 from pygame import K_d
 from pygame import K_a
+from pygame import K_UP
+from pygame import K_LEFT
+from pygame import K_RIGHT
 
 from pygame.sprite import Sprite
 
@@ -34,7 +37,7 @@ class SpaceShip(Sprite, Placeable, Updateable):
         self.acceleration = 100
         self.velocityHat = self.direction.copy()
         self.velocity = 100
-        self.angularVelocity = 100
+        self.angularVelocity = 250
         self.friction = 25
 
     def shoot(self) -> Bullet:
@@ -43,14 +46,14 @@ class SpaceShip(Sprite, Placeable, Updateable):
     def move(self, dt: float) -> None:
         keys = key.get_pressed()
 
-        if keys[K_w]:
+        if keys[K_w] or keys[K_UP]:
             self.velocityHat = self.direction.copy()
             self.velocity += self.acceleration * dt
 
-        if keys[K_d]:
+        if keys[K_d] or keys[K_RIGHT]:
             self.direction.rotate_ip(self.angularVelocity * dt)
 
-        if keys[K_a]:
+        if keys[K_a] or keys[K_LEFT]:
             self.direction.rotate_ip(-self.angularVelocity * dt)
 
         self.velocity -= self.friction * dt
