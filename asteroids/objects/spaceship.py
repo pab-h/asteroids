@@ -1,71 +1,71 @@
-import pygame, math
+from pygame import Surface
+from pygame import Vector2
+from pygame import K_w
+from pygame import K_d
+from pygame import K_a
+
+from pygame.sprite import Sprite
+
+import pygame.image as image
+import pygame.draw as draw
+import pygame.key as key
 import pygame.transform as transform
 
-from pygame import Vector2
-from pygame.sprite import Sprite
+from asteroids.interfaces.placeable import Placeable
 from asteroids.interfaces.updateable import Updateable
-from asteroids.objects.bullet import Bullet
 
-
-class SpaceShip(Sprite, Updateable):
+class SpaceShip(Sprite, Placeable, Updateable):
     def __init__(self) -> None:
         super().__init__()
+        Placeable.__init__(self)
         Updateable.__init__(self)
-       
-        self.surface = pygame.transform.scale (\
-             pygame.image.load("./asteroids/assets/nave3.png")\
-            .convert_alpha(),(50,50))
-        self.surface2 = pygame.transform.scale (\
-             pygame.image.load("./asteroids/assets/nave3_up.png")\
-            .convert_alpha(),(50,50))
-        self.surface.set_colorkey((0,0,0))
-        self.position = pygame.Vector2(300  ,300)
-        self.rect = self.surface.get_rect(center = self.position)
-        self.angle = 0
-        self.surface_copy = pygame.transform.rotate(self.surface,self.angle)
-        self.velocity = pygame.Vector2(0 , 0)
-        self.angle_of_movement = math.atan2(self.velocity[1], self.velocity[0])
-           
-    def movement(self) -> None:
-        keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_RIGHT]: 
-            self.angle = self.angle + 5
-            self.surface_copy = pygame.transform.rotate(self.surface2,self.angle)
-        else:
-            self.surface_copy = pygame.transform.rotate(self.surface,self.angle)
+        self.position = Vector2(300, 300)
 
-        if keys[pygame.K_LEFT]: 
-            self.angle = self.angle - 5
-            
-            self.surface_copy = pygame.transform.rotate(self.surface2,-self.angle)
-        else:
-            self.surface_copy = pygame.transform.rotate(self.surface,-self.angle)
-        
-        if keys[pygame.K_UP]: 
-            self.velocity[0] += math.sin(self.angle) * 2 
-            self.velocity[1] += math.cos(self.angle) * 2 
-            self.surface_copy = pygame.transform.rotate(self.surface2,-self.angle)
-        #else:
-            #if self.velocity[1] > 1:
-                #self.velocity[1] = self.velocity[1] -3
-                #self.surface_copy = pygame.transform.rotate(self.surface,self.angle)
-            
-        
-        if keys[pygame.K_SPACE]: 
-            #shot = Shot()
-            bullet = Bullet(self.rect.x,self.rect.y)
-            self.bullet_group.add(bullet)
-            
-            print("tiro")
-            
-    def update(self, screen: pygame.Surface, dt: float) -> None:
-        
-        self.position -= self.velocity * dt
+        self.surface = image.load("./asteroids/assets/nave.png")
+        self.rect = self.surface.get_rect()
+
+        self.direction = Vector2(self.rect.centerx, self.rect.y) - self.position
+        self.direction.normalize_ip()
+
+        self.acceleration = 100
+
+        self.velocityHat = self.direction.copy()
+        self.velocityHat.rotate_ip(70)
+
+        self.velocity = 100
+        self.angularVelocity = 100
+
+        self.friction = 25
+
+    def move(self, dt: float) -> None:
+        keys = key.get_pressed()
+
+        if keys[K_w]:
+            self.velocityHat = self.direction.copy()
+            self.velocity += self.acceleration * dt
+
+        if keys[K_d]:
+            self.direction.rotate_ip(self.angularVelocity * dt)
+
+        if keys[K_a]:
+            self.direction.rotate_ip(-self.angularVelocity * dt)
+
+        self.velocity -= self.friction * dt
+        self.velocity = max(0, self.velocity)
+        self.velocity = min(200, self.velocity)
+
+        self.position += self.velocity * self.velocityHat * dt
+
+    def update(self, screen: Surface, dt: float) -> None:
+        self.move(dt)
+
+        directionAngle = self.direction.as_polar()[1]
+
+        rotatedSurface = transform.rotate(self.surface, -(directionAngle + 90))
+        rotatedRect = rotatedSurface.get_rect()
+
         self.rect.center = self.position
-        self.movement()
-        print(self.angle)
-        #print(self.position)
-        screen.blit(self.surface_copy,(self.position[0] - int(self.surface_copy.get_width()/2), self.position[1] - int(self.surface_copy.get_height()/2)))
-        #screen.blit(self.surface_copy,self.rect)              
-        
+        rotatedRect.center = self.position
+
+        screen.blit(rotatedSurface, rotatedRect)
