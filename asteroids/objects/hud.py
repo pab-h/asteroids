@@ -9,9 +9,10 @@ from asteroids.interfaces.updateable import Updateable
 class HUD(Sprite, Updateable):
     def __init__(self) -> None:
         super().__init__()
+        
 
-        self.score = 999
-        self.lifes = 9
+        self.score = 0
+        self.lifes = 3
 
         self.surface = Surface(
             size = (600, 50),

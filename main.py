@@ -1,5 +1,5 @@
-from asteroids.app import App
+from asteroids.app2 import App
 
 with App() as app:
-    app.run()
+    app.start_screen()
     
