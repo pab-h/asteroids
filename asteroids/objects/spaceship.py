@@ -1,5 +1,6 @@
 from pygame import Surface
 from pygame import Vector2
+from pygame import Rect
 from pygame import K_w
 from pygame import K_d
 from pygame import K_a
@@ -12,6 +13,7 @@ from pygame.sprite import Sprite
 import pygame.image as image
 import pygame.key as key
 import pygame.transform as transform
+import pygame.display as display
 
 from asteroids.interfaces.placeable import Placeable
 from asteroids.interfaces.updateable import Updateable
@@ -40,6 +42,8 @@ class SpaceShip(Sprite, Placeable, Updateable):
         self.angularVelocity = 250
         self.friction = 25
 
+        self.windowRect = Rect((0, 0), display.get_window_size())
+
     def shoot(self) -> Bullet:
         return Bullet(self, self.direction)
 
@@ -62,8 +66,22 @@ class SpaceShip(Sprite, Placeable, Updateable):
 
         self.position += self.velocity * self.velocityHat * dt
 
+    def edges(self) -> None:
+        if self.position.x <= self.windowRect.x: 
+            self.position.x = self.windowRect.x + self.windowRect.width - self.rect.width / 2
+
+        if self.position.x >= self.windowRect.width:
+            self.position.x = self.windowRect.x
+
+        if self.position.y <= self.windowRect.y:
+            self.position.y = self.windowRect.y + self.windowRect.height - self.rect.height / 2
+
+        if self.position.y >= self.windowRect.height:
+            self.position.y = self.windowRect.y
+
     def update(self, screen: Surface, dt: float) -> None:
         self.move(dt)
+        self.edges()
 
         directionAngle = self.direction.as_polar()[1]
 
