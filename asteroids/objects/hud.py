@@ -1,5 +1,6 @@
 from pygame import Surface
 from pygame import SRCALPHA
+from pygame import Color
 
 from pygame.sprite import Sprite
 from pygame.font import Font
@@ -10,7 +11,6 @@ class HUD(Sprite, Updateable):
     def __init__(self) -> None:
         super().__init__()
         
-
         self.score = 0
         self.lifes = 3
 
@@ -23,7 +23,7 @@ class HUD(Sprite, Updateable):
         self.font = Font("asteroids/assets/Minecraft.ttf", 50)
 
     def update(self, screen: Surface, dt: float) -> None:
-
+        self.surface.fill(Color(0, 0, 0, 0))
         scoreSurface = self.font.render(f"Score: { self.score }", True, "white")
         lifesSurface = self.font.render(f"<3 { self.lifes }", True, "white")
 
