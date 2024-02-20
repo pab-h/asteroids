@@ -77,7 +77,7 @@ class ScoresRepository:
         ranking = []
 
         scores = self.cursor.execute(
-            "SELECT * FROM scores LIMIT 10;"
+            "SELECT * FROM scores LIMIT 10 ORDER BY value ASC;"
         )
 
         for score in scores:
