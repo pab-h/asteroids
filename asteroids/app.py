@@ -1,5 +1,7 @@
 import pygame
 
+from pygame import Vector2
+
 from asteroids.objects.spaceship import SpaceShip
 from asteroids.objects.stars import Stars
 from asteroids.objects.asteroids import Asteroids
@@ -10,8 +12,10 @@ class App:
     def __init__(self) -> None:
         pygame.display.set_caption("Asteroids")
 
+        self.size = Vector2(600, 600)
+
         self.screen = pygame.display.set_mode(
-            size = (600, 600)
+            size = self.size
         )
         self.clock = pygame.time.Clock()
         self.runnig = False
@@ -44,10 +48,14 @@ class App:
         while self.runnig:
             self.screen.fill("black")
 
+            if self.hud.lifes == 0:
+                print("CABOU MAH, MORREU SEU P....")
+
             for bullet in self.bullets:
                 asteroid = self.asteroids.collidePoint(bullet.position) 
 
                 if asteroid:
+                    self.hud.score += 1
                     fragments = asteroid.rupture()
                     self.asteroids.addAll(fragments)
                     self.asteroids.kill(asteroid)
@@ -55,8 +63,16 @@ class App:
 
             asteroid = self.asteroids.collideRect(self.spaceShip.rect)
 
-            if asteroid:
-                print("TOME UM DANO PARA LARGAR DE SER BESTA")
+            if asteroid and not self.spaceShip.untouchable:
+                self.hud.lifes = max(0, self.hud.lifes - 1)
+
+                fragments = asteroid.rupture()
+                self.asteroids.addAll(fragments)
+                self.asteroids.kill(asteroid)
+
+                self.spaceShip.position = self.size / 2
+                self.spaceShip.untouchable = True
+                self.spaceShip.blinkTime = 3
 
             self.stars.update(self.screen, dt)
             self.asteroids.update(self.screen, dt)

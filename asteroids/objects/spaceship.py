@@ -20,6 +20,8 @@ from asteroids.interfaces.updateable import Updateable
 
 from asteroids.objects.bullet import Bullet
 
+from math import cos
+
 class SpaceShip(Sprite, Placeable, Updateable):
     def __init__(self) -> None:
         super().__init__()
@@ -32,6 +34,10 @@ class SpaceShip(Sprite, Placeable, Updateable):
             .load("./asteroids/assets/nave.png")\
             .convert_alpha()
         self.rect = self.surface.get_rect()
+
+        self.blinkTime = 0
+        self.blinkVelocity = 20
+        self.untouchable = False
 
         self.direction = Vector2(self.rect.centerx, self.rect.y) - self.position
         self.direction.normalize_ip()
@@ -79,7 +85,17 @@ class SpaceShip(Sprite, Placeable, Updateable):
         if self.position.y >= self.windowRect.height:
             self.position.y = self.windowRect.y
 
+    def blink(self, dt: float) ->None: 
+        self.blinkTime = max(0, self.blinkTime - dt)
+
+        if self.blinkTime == 0:
+            self.untouchable = False
+
+        alpha =  255 * cos(self.blinkVelocity * self.blinkTime)
+        self.surface.set_alpha(alpha)
+
     def update(self, screen: Surface, dt: float) -> None:
+        self.blink(dt)
         self.move(dt)
         self.edges()
 
